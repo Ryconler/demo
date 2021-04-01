@@ -1,0 +1,179 @@
+#home {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-image: url("../img/index-bg.jpg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+	background-color: #c8a1f4;
+}
+
+#home .home-buttons {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	bottom: 5rem;
+	display: flex;
+	justify-content: center;
+}
+
+#home .home-buttons .baoming-btn {
+	width: 20.7rem;
+	height: 7.15rem;
+	background: url(../img/baoming-button.png);
+	background-size: 100% 100%;
+}
+
+#baoming {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-image: url("../img/baoming-bg.jpg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+	background-color: #c7a1f4;
+	display: none;
+	overflow: scroll;
+}
+
+#baoming .baoming-wrap {
+	position: absolute;
+	top: 11rem;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: scroll;
+}
+
+.header {
+	padding: 2rem 1.7rem;
+	display: flex;
+}
+
+.header .avatar {
+	width: 6rem;
+	height: 6rem;
+	border-radius: 50%;
+	/* background-image: url(http://192.168.220.124:7000/cms-picture//micro-picture//2020-07-22/c5a95ed7-0551-4b63-a836-d6ff4b4df9b9_39.jpg); */
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+.header .user-info {
+	flex-grow: 1;
+	width: auto;
+	height: 6rem;
+	padding: 0.7rem 1.3rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	/* color: #ffd891; */
+	color: #000;
+}
+
+.header .user-name {
+	font-size: 1.8rem;
+}
+
+.header .user-account {
+	font-size: 1.5rem;
+}
+
+.params {
+	padding: 0 1.7rem;
+}
+
+.params .param {
+	padding: 1.6rem 1rem;
+	border-bottom-width: 0.1rem;
+	border-bottom-style: solid;
+	border-bottom-color: #4b4748;
+}
+
+.params .param:first-child {
+	border-top-width: 0.1rem;
+	border-top-style: solid;
+	border-top-color: #4b4748;
+}
+
+.params .param .van-cell {
+	padding: 0;
+	background: transparent;
+	font-size: 1.8rem;
+	overflow: visible;
+}
+
+.params .param .van-field__label {
+	color: #000 !important;
+}
+
+.params .param .van-field__value input {
+	height: 2rem;
+	color: #fff !important;
+}
+
+.params .param .van-field__error-message {
+	position: absolute;
+	top: 2rem;
+	right: 0;
+}
+
+.params .param .van-uploader__preview-image, .params .param .van-uploader__file,
+	.params .param .van-uploader__upload {
+	width: 4rem;
+	height: 4rem;
+	margin-bottom: 0;
+}
+
+.params .param .van-uploader__file-icon {
+	display: none;
+}
+
+.params .button {
+	margin-top: 4.6rem;
+	text-align: center;
+}
+
+.params .button button {
+	width: 20.7rem;
+	height: 4.1rem;
+	font-size: 1.7rem;
+	color: #000;
+	background: #fff;
+	border: none;
+	outline: none;
+	border-radius: 2rem;
+}
+
+#success {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-image: url(../img/baoming-success.png);
+	background-repeat: no-repeat;
+	background-size: 100%;
+	background-color: rgba(0, 0, 0, 0.8);
+	display: none;
+}
+
+#success .success-buttons {
+	position: absolute;
+	top: 33.9rem;
+	left: 0;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+#success .success-buttons .back-button {
+	width: 17.9rem;
+	height: 6.3rem;
+	background: url(../img/back-button.png);
+	background-size: 100% 100%;
+}

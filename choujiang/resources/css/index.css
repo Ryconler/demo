@@ -1,0 +1,514 @@
+.page {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	color: white;
+	overflow: scroll;
+}
+
+.page-wrap {
+	position: relative;
+	background-repeat: no-repeat;
+	background-size: 100%;
+	min-height: 100%;
+	overflow: hidden;
+} 
+
+.top-menu {
+	position: absolute;
+	top: 1.2rem;
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	height: 3.5rem;
+	font-size: 1.9rem;
+}
+
+.top-menu .back {
+	display: flex;
+	align-items: center;
+	font-size: 1.9rem;
+	padding-left: 2.6rem;
+	width: 7rem;
+	background-image: url(../img/back.png);
+	background-repeat: no-repeat;
+	background-size: auto 1.9rem;
+	background-position: 1rem 0.8rem;
+}
+
+.top-menu .rule {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	width: 10rem;
+	padding-right: 0.3rem;
+	background-color: #74ccfc;
+	border-top-left-radius: 3.5rem;
+	border-bottom-left-radius: 3.5rem;
+	border-style: solid;
+	border-width: 0px;
+	padding-right: 0.5rem;
+}
+
+.blue-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 1.9rem;
+	width: 16rem;
+	height: 5.8rem;
+	background-image: url(../img/btn-blue.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+	margin-right: 2rem;
+}
+
+.blue-button:last-child {
+	margin: 0;
+}
+
+.blue-title {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 24.3rem;
+	height: 4.4rem;
+	font-size: 1.9rem;
+	background-image: url(../img/text-blue.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.page-button {
+	width: 10.6rem;
+	height: 3.5rem;
+	border-radius: 1rem;
+	background: #7fcdfd;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-right: 2.5rem;
+	font-size: 1.6rem;
+}
+
+.page-button:last-child {
+	margin: 0;
+}
+
+#index .page-wrap {
+	background-image: url("../img/index-bg.jpg");
+	background-color: rgb(241, 122, 126);
+}
+
+#index .choujiang {
+}
+
+#index .choujiang .chuizi {
+	position: absolute;
+	top: 22rem;
+	left: 15rem;
+	width: 9.55rem;
+	height: 10.95rem;
+	background-image: url(../img/chuizi.png);
+	background-size: 100% 100%;
+	transition: all 0.5s;
+	-moz-transition: all 0.5;
+	-o-transition: all 0.5;
+	-webkit-transition: all 0.5;
+}
+
+#index .choujiang .jindans {
+	position: absolute;
+	top: 34.5rem;
+	left: 0;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+#index .choujiang .jindans .jindan {
+	width: 9.35rem;
+	height: 11.8rem;
+	background-image: url(../img/jindan.png);
+	background-size: 100% 100%;
+	margin-right: 1.4rem;
+}
+#index .choujiang .jindans .jindan.broken {
+	background-image: url(../img/jindan-broken.png);
+}
+#index .choujiang .jindans .jindan:last-child {
+	margin-right: 0;
+}
+
+
+#index .chances {
+	margin-top: 51.2rem;
+	width: 100%;
+	height: 3.8rem;
+	font-size: 1.7rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#index .index-btn {
+	margin-top: 1.5rem;
+	width: 100%;
+	height: 6rem;
+	display: flex;
+	justify-content: center;
+}
+
+#rules {
+	display: none;
+	z-index: 99;
+}
+
+#rules .page-wrap{
+	background-image: url("../img/rules-bg.jpg");
+	background-color: rgb(236, 112, 102);
+}
+
+#rules .rules-title {
+	position: absolute;
+	top: 13rem;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+#rules .rules-text {
+	margin: 19.5rem auto 5rem;
+	left: 6.25rem;
+	width: 25rem;
+	height: 38.7rem;
+	overflow: scroll;
+}
+
+#resultSuccess, #resultFail {
+	display: none;
+	background: rgba(0, 0, 0, 0.85);
+}
+
+#resultSuccess .resultSuccess-wrap, #resultFail .resultFail-wrap {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#resultSuccess .resultSuccess-image {
+	position: relative;
+	width: 33.15rem;
+	height: 40.45rem;
+	background: url(../img/result-success.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+	display: flex;
+	flex-direction: column-reverse;
+	align-items: center;
+}
+
+#resultFail .resultFail-image {
+	position: relative;
+	width: 33.15rem;
+	height: 37.3rem;
+	background: url(../img/result-fail.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-close, #resultFail .resultFail-image .resultFail-close
+	{
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 2.6rem;
+	height: 2.6rem;
+	background: url(../img/close.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-title {
+	position: absolute;
+	bottom: 20rem;
+	width: 100%;
+	text-align: center;
+	font-size: 2.5rem;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-content {
+	position: absolute;
+	left: 5.575rem;
+	bottom: 4.3rem;
+	width: 22rem;
+	height: 12.6rem;
+	background: #fff;
+	border-radius: 1rem;
+	text-align: center;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-content .resultSuccess-action
+	{
+	margin: 0.6rem 0;
+	font-size: 1.8rem;
+	color: #000;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-content .resultSuccess-level
+	{
+	font-size: 2.2rem;
+	color: #f9605e;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-content .resultSuccess-divide
+	{
+	position: relative;
+	height: 2.6rem;
+	line-height: 2.6rem;
+	color: #f2605b;
+	letter-spacing: 1.5;
+}
+
+.divide-circle-left {
+	position: absolute;
+	top: 0;
+	left: -1.3rem;
+	width: 2.6rem;
+	height: 2.6rem;
+	border-radius: 50%;
+	background: #f2605b;
+}
+
+.divide-circle-right {
+	position: absolute;
+	top: 0;
+	right: -1.3rem;
+	width: 2.6rem;
+	height: 2.6rem;
+	border-radius: 50%;
+	background: #f2605b;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-content .resultSuccess-prize
+	{
+	font-size: 1.8rem;
+	color: #f9605e;
+}
+
+#resultSuccess .resultSuccess-image .resultSuccess-tip {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+	line-height: 4.2rem;
+	font-size: 1.2rem;
+}
+
+#resultSuccess .resultSuccess-btn {
+	margin-top: 2.3rem;
+}
+
+#resultFail .resultFail-image .resultFail-title {
+	position: absolute;
+	bottom: 21rem;
+	width: 100%;
+	text-align: center;
+	font-size: 2.5rem;
+}
+
+#resultFail .resultFail-image .resultFail-content {
+	position: absolute;
+	width: 100%;
+	bottom: 7.5rem;
+	left: 0;
+	text-align: center;
+	font-size: 2rem;
+	line-height: 2;
+}
+
+#record {
+	display: none;
+}
+
+#record .page-wrap{
+	background-image: url("../img/record-bg.jpg");
+	background-color: rgb(232, 112, 102);
+}
+
+#record .record-title {
+	margin-top: 10.8rem;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+#record .record-list {
+	margin: 1.7rem auto;
+	width: 34rem;
+	height: auto;
+	color: #000;
+	font-size: 1.6rem;
+}
+
+#record .record-list .record-list-head {
+	display: grid;
+	grid-template-columns: 1fr 1.5fr 1fr;
+	background: #7fcdfd;
+	line-height: 3.5rem;
+	text-align: center;
+}
+
+#record .record-list .record-list-items {
+	padding: 1rem 1.6rem;
+	height: 34rem;
+	overflow: scroll;
+}
+
+#record .record-list .record-list-items .record-list-item {
+	display: grid;
+	grid-template-columns: 1fr 1.5fr 1fr;
+	padding: 0.5rem 0;
+	border-bottom: 1px solid #a0a0a0;
+}
+
+#record .record-list .record-list-items .record-list-item:last-child {
+	border: none;
+}
+
+#record .record-list .record-list-items .record-list-item div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}
+
+#record .record-list .record-list-items .record-list-item .lingqu-btn {
+	width: 7.3rem;
+	height: 2.8rem;
+	line-height: 2.8rem;
+	border-radius: 1rem;
+	background: #9adafe;
+}
+
+#record .record-list .record-list-fanye {
+	display: flex;
+	justify-content: center;
+}
+
+#record .record-tip {
+	margin-top: 6rem;
+	width: 100%;
+	text-align: center;
+	font-size: 1.2rem;
+}
+
+#lingqu {
+	display: none;
+}
+
+#lingqu .page-wrap{
+	background-image: url("../img/lingqu-bg.jpg");
+	background-color: rgb(252, 236, 237);
+}
+
+#lingqu .sure-info {
+	margin-top: 30rem;
+	font-size: 2rem;
+	text-align: center;
+	color: #666666;
+	font-weight: 500;
+}
+
+#lingqu .input-info {
+	display: grid;
+	grid-template-columns: 30% 70%;
+	width: 33.5rem;
+	height: 4rem;
+	padding: 1rem 2rem;
+	margin: 1rem auto;
+	font-size: 1rem;
+	background-color: rgba(255, 255, 255, 0.7);
+	border: 1px solid #acd7f6;
+	border-radius: 0.2rem;
+}
+
+#lingqu .input-info .info-name {
+	color: #333333;
+}
+
+#lingqu .input-info input, #lingqu .input-info textarea {
+	border: none;
+	outline: none;
+	background: transparent;
+	color: #999999;
+	word-break: break-all;
+}
+
+#lingqu .input-info.info-address {
+	height: 8rem;
+}
+
+#lingqu .lingqu-btn {
+	display: flex;
+	width: 100%;
+	margin: 2.5rem 0;
+	justify-content: center;
+}
+
+#lingquSuccess {
+	display: none;
+	background: rgba(0, 0, 0, 0.85);
+	z-index: 99;
+}
+
+#lingquSuccess .lingquSuccess-wrap {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#lingquSuccess .lingquSuccess-image {
+	position: relative;
+	width: 33.15rem;
+	height: 27.95rem;
+	background: url(../img/lingqu-success.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#lingquSuccess .lingquSuccess-btn {
+	margin-top: 2.3rem;
+}
+
+#lingquSuccess .lingquSuccess-title {
+	position: absolute;
+	top: 9rem;
+	width: 100%;
+	text-align: center;
+	font-size: 2.5rem;
+}
+
+#lingquSuccess .lingquSuccess-tip1 {
+	position: absolute;
+	top: 17.5rem;
+	width: 100%;
+	text-align: center;
+	font-size: 2rem;
+}
+
+#lingquSuccess .lingquSuccess-tip2 {
+	position: absolute;
+	top: 21.3rem;
+	width: 100%;
+	text-align: center;
+	font-size: 2rem;
+}

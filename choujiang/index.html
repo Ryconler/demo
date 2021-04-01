@@ -1,0 +1,662 @@
+<!DOCTYPE HMTL>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<script src="./resources/js/area.js"></script>
+
+	<script src="./resources/js/jquery-3.5.1.min.js"></script>
+	<script src="./resources/js/vue-dev.js"></script>
+	<script src="./resources/js/vant.min.js"></script>
+
+	<link rel="stylesheet" href="./resources/css/vant.css" />
+
+	<link rel="stylesheet" href="./resources/css/index.css?r=" <%=Math.random()%> />
+	<title>抽奖活动-欢乐砸金蛋</title>
+	<style type="text/css">
+		body {
+			margin: 0
+		}
+
+		div {
+			box-sizing: border-box;
+		}
+
+		#app {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			overflow: hidden;
+		}
+	</style>
+	<script>
+		function calcWidth() {
+			const html = document.documentElement;
+			const width = html.getBoundingClientRect().width;
+			html.style.fontSize = 20 * (width / 750) + "px";
+		}
+		window.onresize = calcWidth;
+		calcWidth();
+
+		$.ajaxSetup({
+			headers: {
+				accessToken: "accessToken",
+				openId: "openId",
+				timestamp: Date.now()
+			}
+		});
+	</script>
+</head>
+
+<body>
+	<div id="app">
+		<!-- 首页 -->
+		<div id="index" class="page">
+			<div class="page-wrap">
+				<div class="top-menu">
+					<div></div>
+					<!-- <div class="back">
+						<span>返回</span>
+					</div> -->
+					<div class="rule" @click="toggle('rules');">
+						<span>活动规则</span>
+					</div>
+				</div>
+
+				<div class="choujiang">
+					<div class="chuizi" :style="choujiangChuiziStyle"></div>
+					<div class="jindans">
+						<div class="jindan" @click="onClickChoujiang(0)"></div>
+						<div class="jindan" @click="onClickChoujiang(1)"></div>
+						<div class="jindan" @click="onClickChoujiang(2)"></div>
+					</div>
+				</div>
+
+				<div class="chances">
+					<span v-text="'剩余'+todayLeftCount+'次抽奖机会'"></span>
+				</div>
+
+				<div class="index-btn">
+					<div class="blue-button" @click="toggle('rules');">
+						<span>活动规则</span>
+					</div>
+					<div class="blue-button" @click="showRecord(true)">
+						<span>中奖记录</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 抽奖中奖页面 -->
+		<div id="resultSuccess" class="page">
+			<div class="resultSuccess-wrap">
+				<div class="resultSuccess-image">
+					<div class="resultSuccess-close" @click="toggle('resultSuccess')"></div>
+					<div class="resultSuccess-title">恭喜你</div>
+					<div class="resultSuccess-content">
+						<div class="resultSuccess-action">抽中了</div>
+						<div class="resultSuccess-level">{{getPrizeLevel(choujiangPrize.level)}}</div>
+						<div class="resultSuccess-divide">
+							<div class="divide-circle-left"></div>
+							<div class="divide-circle-right"></div>
+							<div>-----------------------</div>
+						</div>
+						<div class="resultSuccess-prize">{{choujiangPrize.materialName}}</div>
+					</div>
+					<div class="resultSuccess-tip">前往中将记录领取奖品</div>
+				</div>
+				<div class="resultSuccess-btn">
+					<div class="blue-button" @click="showRecord">
+						<span>领取奖品</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 抽奖未中奖页面 -->
+		<div id="resultFail" class="page">
+			<div class="resultFail-wrap">
+				<div class="resultFail-image">
+					<div class="resultFail-close" @click="toggle('resultFail')"></div>
+					<div class="resultFail-title">很遗憾</div>
+					<div class="resultFail-content">
+						<div>本次抽奖没有中奖哦</div>
+						<div>继续加油把</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 活动规则 -->
+		<div id="rules" class="page">
+			<div class="page-wrap">
+				<div class="top-menu">
+					<div class="back" @click="toggle('rules');">
+						<span>返回</span>
+					</div>
+				</div>
+				<div class="rules-title">
+					<div class="blue-title">
+						<span>活动规则</span>
+					</div>
+				</div>
+				<div class="rules-text">
+					<img :src="ruleImage" alt="活动规则图片" style="width: 100%;">
+				</div>
+			</div>
+		</div>
+
+		<!-- 抽奖记录 -->
+		<div id="record" class="page">
+			<div class="page-wrap">
+				<div class="top-menu">
+					<div @click="toggle('record')" class="back">
+						<span>返回</span>
+					</div>
+				</div>
+				<div class="record-title">
+					<div class="blue-title">
+						<span>中奖记录</span>
+					</div>
+				</div>
+
+				<div class="record-list">
+					<div class="record-list-head">
+						<div>时间</div>
+						<div>奖品</div>
+						<div>状态</div>
+					</div>
+
+					<div class="record-list-items">
+						<div class="record-list-item" v-for="(record,index) of recordList" :key="index">
+							<div>{{getYYYYMMDDDate(record.createTime)}}</div>
+							<div>{{record.materialName}}</div>
+							<div>
+								<div v-if="record.cashStatus==0" @click="onClickLingqu(record)" class="lingqu-btn">领取</div>
+								<template v-else> 已领取 </template>
+							</div>
+						</div>
+					</div>
+
+					<div class="record-list-fanye">
+						<div class="page-button" @click="lastPage">上一页</div>
+						<div class="page-button" @click="nextPage">下一页</div>
+					</div>
+				</div>
+
+				<div class="record-tip">
+					<span>超过72小时未领取即失效</span>
+				</div>
+
+
+			</div>
+		</div>
+
+		<!-- 领取页面 -->
+		<div id="lingqu" class="page">
+			<div class="page-wrap">
+				<div class="top-menu">
+					<div @click="toggle('lingqu')" class="back">
+						<span>返回</span>
+					</div>
+					<div class="rule" @click="toggle('rules')">
+						<span>活动规则</span>
+					</div>
+				</div>
+
+				<div class="sure-info">
+					<span>请输入您的信息领取奖品</span>
+				</div>
+				<div class="input-info" id="nameInfo">
+					<div class="info-name">姓名</div>
+					<input v-model="lingquInfo.name">
+				</div>
+				<div class="input-info" id="mobileInfo">
+					<div class="info-name">手机</div>
+					<input v-model="lingquInfo.mobile">
+				</div>
+				<div class="input-info" id="cityInfo">
+					<div class="info-name">所在城市</div>
+					<input v-model="lingquInfo.city">
+				</div>
+				<div class="input-info info-address" id="addressInfo">
+					<div class="info-name">详细地址</div>
+					<textarea rows="3" cols="" v-model="lingquInfo.address"></textarea>
+				</div>
+
+				<div class="lingqu-btn">
+					<div class="blue-button" @click="lingqu()">
+						<span>确定</span>
+					</div>
+					<!-- <div class="blue-button">
+						<span>修改</span>
+					</div> -->
+				</div>
+			</div>
+		</div>
+
+		<!-- 领取成功 -->
+		<div id="lingquSuccess" class="page">
+			<div class="lingquSuccess-wrap">
+				<div class="lingquSuccess-image">
+					<div class="lingquSuccess-title">领取成功</div>
+					<div class="lingquSuccess-tip1">虚拟奖会在5天内发放</div>
+					<div class="lingquSuccess-tip2">实物奖会在10天内快递发出</div>
+				</div>
+				<div class="lingquSuccess-btn">
+					<div class="blue-button" @click="toggle('lingquSuccess')">
+						<span>好的</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	var vm = new Vue(
+		{
+			el: '#app',
+			data: {
+				userInfo: {
+					openId: "openId",
+					stbId: "stbId",
+					amount: 0,
+					remark: "remark",
+				}, // 用户信息
+				chn: "wechat",
+				baseApi: "https://www.fastmock.site/mock/f93caed92f89d3a2a02b6cd98e650b02/activity",
+				baseApiUcenter: "https://www.fastmock.site/mock/8bd8cf053e7d6d1ff21116fed0819c97/ucenter",
+				issueCode: "issueCode",
+				poolCode: "",
+				chancesOfEveryDay: 10,  // 每日可抽奖次数
+				choujiangAmount: 0, // 每次抽奖消耗积分
+				ruleImage: "./resources/img/rules.png",
+				recordList: [],
+				recordPagination: {
+					pageNo: 1,
+					pageSize: 7,
+					totalPages: 1,
+				},
+				todayLeftCount: 0, // 剩余抽奖次数
+				choujiangPrize: {}, // 中奖奖品
+				choujiangChuiziStyle: {
+					top: "22rem",
+					left: "15rem",
+					transform: "rotate(0)"
+				},
+				choujiangDidsabled: false,
+				choujiangFirst: true,
+				lingquPrize: null, // 领取奖品
+				lingquInfo: {
+					name: "",
+					mobile: "",
+					city: "",
+					address: "",
+				},
+				prizeLevelEnum: [
+					{ name: "一等奖", code: 0 },
+					{ name: "二等奖", code: 1 },
+					{ name: "三等奖", code: 2 },
+					{ name: "四等奖", code: 3 },
+					{ name: "五等奖", code: 4 },
+					{ name: "六等奖", code: 5 },
+					{ name: "七等奖", code: 6 },
+					{ name: "八等奖", code: 7 },
+				],
+
+				userWechat: {
+				},
+				userInfoFormInit: {
+					showSex: false,
+					sexOptions: ['男', '女'],
+					showBirthday: false,
+					minDate: new Date(1900, 0, 1),
+					maxDate: new Date(),
+					currentDate: new Date(),
+					showArea: false,
+					areaList: areaList,
+				},
+				area: "",
+				birthdayLocal: "",
+				stbId: "",
+				sexLocal: "",
+			},
+			mounted() {
+				this.getPoolCode();
+				this.initCounts();
+
+				this.openId = "openId";//不会有openId 'null'
+				this.stbId = "stbId";
+				console.log("params:", this.openId, this.stbId);
+
+				// getUserInfo(this)
+				// initUserInfoForm(this)
+			},
+			methods: {
+				toggle(id) {
+					$("#" + id).toggle();
+				},
+				// onConfirmArea(values) {
+				// 	onConfirmArea(this, values)
+				// },
+				// onConfirmBirthday(date) {
+				// 	onConfirmBirthday(this, date)
+				// },
+				// onConfirmSex(value) {
+				// 	onConfirmSex(this, value)
+				// },
+				// hideUserInfo: function () {
+				// 	hideUserInfo(this)
+				// },
+				// updateUserInfo: function () {
+				// 	updateUserInfo(this)
+				// },
+				/* 获取奖池code */
+				getPoolCode() {
+					let url = this.baseApi + "/lottery/v1/" + this.issueCode + "/pool";
+					$.ajax({
+						type: "get",
+						url: url,
+						async: false,
+						success: data => {
+							if (data.code == 0) {
+								this.poolCode = data.result.poolCode;
+							} else {
+								this.$notify({ type: 'danger', message: data.msg });
+							}
+						}
+					})
+				},
+				/* 初始化抽奖次数 */
+				initCounts() {
+					let url = this.baseApi + "/lottery/v1/count";
+					let that = this 
+					$.ajax({
+						type: "get",
+						url: url,
+						data: {
+							chn: this.chn,
+							issueCode: this.issueCode,
+							stbId: this.userInfo.stbId,
+							poolCodes: this.poolCode
+						},
+						success: result => {
+							if (result.code == 0) {
+								let left = parseInt(that.chancesOfEveryDay) - result.result.todayNum;
+								if (left <= 0) {
+									left = 0;
+								}
+								that.todayLeftCount = left;
+							} else {
+								that.$notify({ type: 'danger', message: data.msg });
+							}
+						}
+					})
+				},
+				/* 获取微信用户信息 */
+				initLingquInfo() {
+					const lingquInfo = localStorage.getItem("lingquInfo");
+					if (lingquInfo) {
+						try {
+							this.lingquInfo = JSON.parse(lingquInfo);
+						} catch (error) {
+							console.log('error :>> ', error);
+						}
+					} else {
+						this.lingquInfo = {
+							name: this.userWechat.nickname,
+							mobile: this.userWechat.mobile,
+							city: this.userWechat.location,
+							address: this.userWechat.address,
+						};
+					}
+					// let url = this.ucenterApi + "/user/query";
+					// $.ajax({
+					// 	type: "get",
+					// 	url: url,
+					// 	data: {
+					// 		userId: this.userInfo.openId
+					// 	},
+					// 	success: result => {
+					// 		if (result.status == 200) {
+					// 			this.lingquInfo = {
+					// 				name: result.result.nickname,
+					// 				mobile: result.result.mobile,
+					// 				city: result.result.city,
+					// 				address: result.result.address
+					// 			}
+					// 		}
+					// 	}
+					// })
+				},
+				/* 点击抽奖 */
+				onClickChoujiang(jindanNum) {
+					if (this.choujiangDidsabled) {
+						return;
+					}
+					this.choujiangDidsabled = true;
+					setTimeout(() => {
+						this.choujiangDidsabled = false;
+					}, 2000)
+
+
+					const jindansEle = $(".choujiang .jindans .jindan");
+					jindansEle.removeClass("broken");
+					this.choujiangChuiziStyle.top = "22rem";
+					this.choujiangChuiziStyle['transform'] = "rotate(0)";
+					this.choujiangChuiziStyle['-moz-transform'] = "rotate(0)";
+					this.choujiangChuiziStyle['-ms-transform'] = "rotate(0)";
+					this.choujiangChuiziStyle['-o-transform'] = "rotate(0)";
+					this.choujiangChuiziStyle['-webkit-transform'] = "rotate(0)";
+					switch (jindanNum) {
+						case 0:
+							this.choujiangChuiziStyle.left = "4rem";
+							break;
+						case 1:
+							this.choujiangChuiziStyle.left = "15rem";
+							break;
+						case 2:
+							this.choujiangChuiziStyle.left = "26rem";
+							break;
+						default:
+							this.choujiangChuiziStyle.left = "15rem";
+					}
+					setTimeout(() => {
+						this.choujiangChuiziStyle.top = "25rem";
+						this.choujiangChuiziStyle['transform'] = "rotate(-30deg)";
+						this.choujiangChuiziStyle['-moz-transform'] = "rotate(-30deg)";
+						this.choujiangChuiziStyle['-ms-transform'] = "rotate(-30deg)";
+						this.choujiangChuiziStyle['-o-transform'] = "rotate(-30deg)";
+						this.choujiangChuiziStyle['-webkit-transform'] = "rotate(-30deg)";
+						setTimeout(() => {
+							jindansEle.eq(jindanNum).addClass("broken")
+							this.getIssueAccount();
+							this.choujiang();
+						}, 500)
+					}, (this.choujiangFirst && jindanNum === 1) ? 0 : 500)
+					this.choujiangFirst = false;
+				},
+				/* 获取活动用户信息 */
+				getIssueAccount() {
+					const api = this.baseApi + "/issue/v1/getIssueAccount";
+					const param = {
+						chn: this.chn,
+						issueCode: this.issueCode,
+						stbId: this.userInfo.stbId,
+					};
+					$.ajax({
+						type: "post",
+						url: api,
+						data: param,
+						async: false,
+						success: (data) => {
+							if (data.code === 0) {
+								this.userInfo.amount = data.result.amount;
+								this.userInfo.remark = data.result.remark;
+							} else {
+								this.$notify({ type: 'danger', message: data.msg });
+							}
+						}
+					});
+				},
+				choujiang() {
+					if (this.todayLeftCount <= 0) {
+						this.$notify({ type: 'danger', message: "抽奖次数不足" });
+						return;
+					}
+					// if (this.userInfo.amount < this.choujiangAmount) {
+					// 	console.log('用户积分不足', this.userInfo.amount, this.choujiangAmount);
+					// 	alert("积分不足");
+					// 	return;
+					// }
+					let url = this.baseApi + "/lottery/v1/draw";
+					$.ajax({
+						type: "get",
+						url: url,
+						data: {
+							chn: this.chn,
+							issueCode: this.issueCode,
+							amount: this.choujiangAmount,
+							stbId: this.userInfo.stbId,
+							remark: this.userInfo.remark,
+						},
+						success: data => {
+							if (data.code == 0) {
+								if (data.result) {
+									this.choujiangPrize = data.result;
+									this.toggle("resultSuccess")
+								} else {
+									this.toggle("resultFail")
+								}
+								this.todayLeftCount = this.todayLeftCount - 1;
+							} else {
+								this.$notify({ type: 'danger', message: data.msg });
+							}
+						}
+					})
+				},
+				/* 显示记录 */
+				showRecord(showPersonInfo) {
+					showPersonInfo && this.toggle("personInfo")
+					this.toggle("record");
+					this.listRecord()
+				},
+				nextPage() {
+					this.recordPagination.pageNo++;
+					if (this.recordPagination.pageNo > this.recordPagination.totalPages) {
+						this.recordPagination.pageNo = this.recordPagination.totalPages;
+						return;
+					}
+					this.listRecord();
+				},
+				lastPage() {
+					this.recordPagination.pageNo--;
+					if (this.recordPagination.pageNo < 1) {
+						this.recordPagination.pageNo = 1;
+						return;
+					}
+					this.listRecord();
+				},
+				listRecord() {
+					let url = this.baseApi + "/cash/v1/find";
+					$.ajax({
+						type: "get",
+						url: url,
+						data: {
+							chn: this.chn,
+							issueCode: this.issueCode,
+							stbId: this.userInfo.stbId,
+							pageNo: this.recordPagination.pageNo,
+							pageSize: this.recordPagination.pageSize,
+						},
+						success: data => {
+							if (data.code == 0) {
+								this.recordList = data.result;
+								this.recordPagination.totalPages = data.page.totalPages;
+							} else {
+								this.$notify({ type: 'danger', message: data.msg });
+							}
+						}
+					})
+				},
+				/* 点击领取 */
+				onClickLingqu(prize) {
+					this.lingquPrize = prize;
+					this.initLingquInfo();
+					if (prize.category === "Entity") {
+						this.toggle("lingqu");
+					} else {
+						this.lingqu();
+					}
+				},
+				/* 领取奖品 */
+				lingqu() {
+					if (!this.lingquPrize) {
+						console.log("no this.lingquPrize")
+						return;
+					}
+					if (this.lingquPrize.category === "Entity") {
+						$("#nameInfo").css({ border: "1px solid #acd7f6" });
+						$("#mobileInfo").css({ border: "1px solid #acd7f6" });
+						$("#cityInfo").css({ border: "1px solid #acd7f6" });
+						$("#addressInfo").css({ border: "1px solid #acd7f6" });
+						if (!this.lingquInfo.name) {
+							$("#nameInfo").css({ border: "1px solid red" });
+							return;
+						}
+						if (!this.lingquInfo.mobile) {
+							$("#mobileInfo").css({ border: "1px solid red" });
+							return;
+						}
+						if (!this.lingquInfo.city) {
+							$("#cityInfo").css({ border: "1px solid red" });
+							return;
+						}
+						if (!this.lingquInfo.address) {
+							$("#addressInfo").css({ border: "1px solid red" });
+							return;
+						}
+					}
+					localStorage.setItem("lingquInfo", JSON.stringify(this.lingquInfo));
+					let url = this.baseApi + "/cash/v1/cashing";
+					let that = this;
+					$.ajax({
+						type: "get",
+						url: url,
+						data: {
+							chn: this.chn,
+							issueCode: this.issueCode,
+							cashId: this.lingquPrize.recordId,
+							stbId: this.userInfo.stbId,
+							remark: this.userInfo.remark,
+							mobile: this.lingquInfo.mobile,
+							name: this.lingquInfo.name,
+							address: this.lingquInfo.city + this.lingquInfo.address
+						},
+						success: data => {
+							if (data.code == 0) {
+								this.toggle("lingquSuccess");
+								this.listRecord();
+								$("#lingqu").hide()
+							} else {
+								this.$notify({ type: 'danger', message: data.msg });
+							}
+						}
+					})
+				},
+				getPrizeLevel(level) {
+					const prizeLevel = this.prizeLevelEnum.find(item => item.code == level);
+					return prizeLevel && prizeLevel.name;
+				},
+				getYYYYMMDDDate(timeStr) {
+					return timeStr;
+				}
+			}
+		})
+</script>
+
+</html>

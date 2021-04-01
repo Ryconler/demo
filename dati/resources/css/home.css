@@ -1,0 +1,49 @@
+#home {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-image: url("../img/bg-index.jpg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+	background-color: #35a573;
+}
+
+#home .rule {
+	position: absolute;
+	top: 1.4rem;
+	right: 0;
+	width: 10.5rem;
+	height: 4rem;
+	background: url(../img/button-rule.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+#home .buttons {
+	position: absolute;
+	width: 100%;
+	bottom: 4.5rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#home .buttons .button {
+	width: 22.2rem;
+	height: 7.7rem;
+	margin-bottom: 3.4rem;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+#home .buttons .button-begin {
+	background-image: url(../img/button-begin.png);
+}
+
+#home .buttons .button-rank {
+	background-image: url(../img/button-rank.png);
+	margin-bottom: 0;
+}

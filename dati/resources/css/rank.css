@@ -1,0 +1,124 @@
+#rank .rank {
+	position: relative;
+	width: 32rem;
+	height: 47rem;
+	background: #38a876;
+	border-radius: 2rem;
+	box-shadow: 0 0.5rem #116c5b;
+	padding: 2.9rem 1.8rem;
+}
+
+#rank .rank-title {
+	position: absolute;
+	left: 9.5rem;
+	top: -3.2rem;
+	width: 12.85rem;
+	height: 5.2rem;
+	background: url(../img/tip-rank-title.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+#rank .rank-close {
+	position: absolute;
+	right: 0.4rem;
+	top: -1.1rem;
+	width: 3.15rem;
+	height: 3.75rem;
+	background: url(../img/button-rank-x.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+#rank .rank-wrap {
+	border-radius: 2rem;
+	background: #18774d;
+	width: 100%;
+	height: 100%;
+	padding: 0 1.5rem;
+	overflow: scroll;
+}
+
+#rank .rank-wrap .rank-item {
+	position: relative;
+	display: flex;
+	width: 100%;
+	height: 5.6rem;
+	border-radius: 2rem;
+	margin-bottom: 1.8rem;
+	box-shadow: 0 0.3rem #7a9836;
+}
+
+#rank .rank-wrap .rank-item:first-child {
+	margin-top: 1.2rem;
+}
+
+#rank .rank-wrap .rank-item .rank-num {
+	width: 5.5rem;
+	height: 5.6rem;
+	line-height: 5.6rem;
+	border-top-left-radius: 2rem;
+	border-bottom-left-radius: 2rem;
+	text-align: center;
+	background: #79c886;
+	color: #18774d;
+	font-size: 24px;
+}
+
+#rank .rank-wrap .rank-item .rank-me {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 2.75rem;
+	height: 2.75rem;
+	line-height: 2.75rem;
+	border-bottom-left-radius: 2rem;
+	border-top-right-radius: 2rem;
+	text-align: center;
+	background: #fbc934;
+	font-size: 13px;
+	color: #222014;
+}
+
+#rank .rank-wrap .rank-item .rank-user {
+	flex-grow: 1;
+	height: 5.6rem;
+	border-top-right-radius: 2rem;
+	border-bottom-right-radius: 2rem;
+	background: #25a96f;
+	display: flex;
+	align-items: center;
+}
+
+#rank .rank-wrap .rank-item .rank-user .user-avatar {
+	border-radius: 50%;
+	width: 5.25rem;
+	height: 5.25rem;
+	margin-left: 1.5rem;
+	border: 0.4rem solid #ffffff;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+#rank .rank-wrap .rank-item .rank-user .user-info {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	width: 11.3rem;
+	color: #ffffff;
+	font-size: 14px;
+	text-align: center;
+}
+
+#rank .rank-wrap .rank-item .rank-user .user-info .user-name {
+	width: 100%;
+}
+
+#rank .rank-wrap .rank-item .rank-user .user-info .user-score {
+	width: 100%;
+	height: 2rem;
+	line-height: 2rem;
+	border-radius: 2rem;
+	background: #28835a;
+}

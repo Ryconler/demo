@@ -1,0 +1,367 @@
+<!DOCTYPE HMTL>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>投票</title>
+
+    <script src="./resources/js/jquery-3.5.1.min.js"></script>
+    <script src="./resources/js/vue-dev.js"></script>
+    <script src="./resources/js/vant.min.js"></script>
+    <link href="./resources/css/index.css" rel="stylesheet" />
+    <link href="./resources/css/vant.css" rel="stylesheet" />
+    <style type="text/css">
+        body {
+            margin: 0
+        }
+
+        div {
+            box-sizing: border-box;
+        }
+
+        #app {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        .model {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function calcWidth() {
+            const html = document.documentElement;
+            const width = html.getBoundingClientRect().width;
+            html.style.fontSize = 20 * (width / 750) + "px";
+        }
+        window.onresize = calcWidth;
+        calcWidth();
+
+        $.ajaxSetup({
+            headers: {
+                accessToken: "accessToken",
+                openId: "openId",
+                timestamp: Date.now()
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 首页 -->
+        <div id="home">
+            <div class="top-menu">
+                <div></div>
+                <!-- <div class="back">
+                    <span>返回</span>
+                </div> -->
+                <div class="rank" @click="showRank">
+                    <span>排行榜</span>
+                </div>
+            </div>
+            <div class="header">
+                <div class="title"></div>
+                <div class="search">
+                    <input class="search-input" v-model="searchKeyword" placeholder="视频名称"></input>
+                    <div class="search-button" @click="filterQuestion"></div>
+                </div>
+            </div>
+            <div class="entries" v-for="voteQuestion of voteQuestions" :key="voteQuestion.id">
+                <div class="subtitle">剩余可投票数：{{getLeftVoteCount(voteQuestion.id)}}票</div>
+                <div class="entry" v-for="option of voteQuestion.options" :key="option.optionNum">
+                    <div class="entry-cover">
+                        <img class="entry-img" v-if="option.imgOption"
+                            @click="showImage(option.imgOption)"
+                            :src="option.imgOption" alt="">
+                        <video class="entry-video" v-else-if="option.mediaOption" :src="option.mediaOption"></video>
+                        <div class="entry-text" v-else-if="option.textOption" @click="showText(option.textOption)">
+                            {{option.textOption}}</div>
+                        <div class="play-btn" v-if="option.mediaOption" @click="showMedia(option.mediaOption)"></div>
+                        <div class="entry-title">{{option.textOption}}</div>
+                    </div>
+                    <div class="entry-votenum">
+                        <span>已获{{getVoteNum(voteQuestion.id,option.optionNum)}}票</span>
+                        <transition name="fade">
+                            <i class="plus1-icon" v-if="option.showPlus1"></i>
+                        </transition>
+                    </div>
+                    <div class="entry-votebtn" @click="voteOption(voteQuestion.id,option)"></div>
+                </div>
+            </div>
+        </div>
+        <div id="rank">
+            <div class="top-menu">
+                <div class="back" @click="closeRank">
+                    <span>返回</span>
+                </div>
+            </div>
+            <div class="header">
+                <div class="title"></div>
+                <div class="search">
+                    <input class="search-input" v-model="searchKeyword" placeholder="视频名称"></input>
+                    <div class="search-button" @click="filterQuestion"></div>
+                </div>
+            </div>
+            <div class="entries" v-for="voteQuestion of voteQuestions" :key="voteQuestion.id">
+                <div class="entry" v-for="(option,index) of voteQuestion.options" :key="option.optionNum">
+                    <div class="entry-cover">
+                        <img class="entry-img" v-if="option.imgOption"
+                            @click="showImage(option.imgOption)"
+                            :src="option.imgOption" alt="">
+                        <video class="entry-video" v-else-if="option.mediaOption" :src="option.mediaOption"></video>
+                        <div class="entry-text" v-else-if="option.textOption" @click="showText(option.textOption)">
+                            {{option.textOption}}</div>
+                        <div class="play-btn" v-if="option.mediaOption" @click="showMedia(option.mediaOption)"></div>
+                        <div class="entry-title">{{option.textOption}}</div>
+                        <div class="entry-sub">{{option.rankNum||(index+1)}}</div>
+                    </div>
+                    <div class="entry-votenum">
+                        <span>已获{{getVoteNum(voteQuestion.id,option.optionNum)}}票</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="media" @click="toggle('media')">
+            <video :src="mediaPath" controls @click.stop autoplay></video>
+            <i class="close-btn" @click.stop="toggle('media')"></i>
+        </div>
+        <div id="image" @click="toggle('image')">
+            <img :src="imagePath" alt="" @click.stop></img>
+            <i class="close-btn" @click.stop="toggle('image')"></i>
+        </div>
+        <div id="text" @click="toggle('text')">
+            <div v-html="text" @click.stop></div>
+            <i class="close-btn" @click.stop="toggle('text')"></i>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            userInfo: {
+                stbId: "stbId", // 用户标识（url参数获取）
+            }, // 用户信息
+            chn: "wechat",  // 渠道标识
+            baseApi: "https://www.fastmock.site/mock/f93caed92f89d3a2a02b6cd98e650b02/activity",  // 活动API地址
+            resourceUrl: "./",  // 图片基础路径
+            issueCode: "issueCode", //活动code（模板配置获取）
+            voteQuestions: [],
+            voteQuestionsBak: [],  // 数据备份，用于取消筛选后恢复
+            voteStats: {},
+            voteRecords: {},
+            searchKeyword: "",
+            mediaPath: "",
+            imagePath: "",
+            text: "",
+        },
+        computed: {
+        },
+        mounted() {
+            this.getQuestion();
+        },
+        methods: {
+            toggle(id) {
+                $("#" + id).toggle();
+            },
+            /* 获取所有题目作品 */
+            getQuestion(callback) {
+                const api = this.baseApi + "/vote/v1/question";
+                const param = {
+                    chn: this.chn,
+                    issueCode: this.issueCode,
+                    stbId: this.userInfo.stbId,
+                };
+                $.ajax({
+                    type: "get",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            this.voteQuestions = data.result;
+                            for (const voteQuestion of this.voteQuestions) {
+                                this.getVoteStat(voteQuestion.id);
+                                this.getVoteRecord(voteQuestion.id);
+                                // try {
+                                //     const options = JSON.parse(voteQuestion.options);
+                                //     voteQuestion.options = options;
+                                // } catch (e) { console.log('e :>> ', e); }
+                            }
+                            this.voteQuestionsBak = JSON.parse(JSON.stringify(this.voteQuestions));
+                            console.log('this.voteQuestions :>> ', this.voteQuestions);
+                            callback && callback();
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 获取指定题目作品投票结果统计 */
+            getVoteStat(voteId) {
+                const api = this.baseApi + "/vote/v1/voteStat";
+                const param = {
+                    issueCode: this.issueCode,
+                    voteId: voteId
+                };
+                $.ajax({
+                    type: "get",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            this.$set(this.voteStats, voteId, data.result);
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 获取自己指定题目作品的投票记录 */
+            getVoteRecord(voteId) {
+                const api = this.baseApi + "/vote/v1/record";
+                const param = {
+                    voteId: voteId,
+                    stbId: this.userInfo.stbId
+                };
+                $.ajax({
+                    type: "get",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            this.$set(this.voteRecords, voteId, data.result);
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 点击投票 */
+            voteOption(voteId, option) {
+                const api = this.baseApi + "/vote/v1/vote";
+                const param = {
+                    voteId: voteId,
+                    optionNum: option.optionNum,
+                    stbId: this.userInfo.stbId,
+                };
+                $.ajax({
+                    type: "post",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            // this.getVoteStat(voteId);
+                            this.getQuestion(() => {
+                                const voteQuestion = this.voteQuestions.find(item => item.id == voteId);
+                                const newOptions = voteQuestion.options;
+                                const newOption = newOptions.find(item => item.optionNum == option.optionNum);
+                                this.$set(newOption, "showPlus1", true);
+                                setTimeout(() => {
+                                    this.$set(newOption, "showPlus1", false);
+                                }, 1000);
+                            });
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 获取指定题目作品投票数 */
+            getVoteNum(voteId, optionNum) {
+                const voteStat = this.voteStats[voteId] || [];
+                const optionCount = voteStat.find(optionCount => optionCount.optionNum == optionNum);
+                return optionCount ? optionCount.count : 0;
+            },
+            /* 自己指定题目作品是否投过票 */
+            hasMyVote(voteId, optionNum) {
+                const voteRecord = this.voteRecords[voteId] || [];
+                const record = voteRecord.find(record => record.optionNum == optionNum);
+                return !!record;
+            },
+            /* 指定题目的剩余投票次数 */
+            getLeftVoteCount(voteId) {
+                const voteQuestion = this.voteQuestions.find(voteQuestion => voteQuestion.id == voteId);
+                const voteRecord = this.voteRecords[voteId] || [];
+                if (voteQuestion) {
+                    return voteQuestion.maxLimit - voteRecord.length;
+                }
+                return 0;
+            },
+            /* 显示排行榜 */
+            showRank() {
+                this.searchKeyword = "";
+                this.rankQuestion();
+                this.toggle("rank");
+            },
+            closeRank() {
+                this.searchKeyword = "";
+                this.getQuestion();
+                this.toggle("rank");
+            },
+            /* 排序题目作品 */
+            rankQuestion() {
+                this.voteQuestions = JSON.parse(JSON.stringify(this.voteQuestionsBak));
+                for (const voteQuestion of this.voteQuestions) {
+                    const voteStat = this.voteStats[voteQuestion.id];
+                    voteQuestion.options.sort((option1, option2) => {
+                        const option1Count = voteStat.find(optionCount => optionCount.optionNum == option1.optionNum) || { count: 0 };
+                        const option2Count = voteStat.find(optionCount => optionCount.optionNum == option2.optionNum) || { count: 0 };
+                        return option2Count.count - option1Count.count;
+                    });
+                    for (let index = 0; index < voteQuestion.options.length; index++) {
+                        voteQuestion.options[index].rankNum = index + 1;
+                    }
+                }
+                this.voteQuestionsBak = JSON.parse(JSON.stringify(this.voteQuestions));
+                console.log('this.voteQuestions :>> ', this.voteQuestions);
+            },
+            /* 关键词筛选题目作品 */
+            filterQuestion() {
+                this.voteQuestions = JSON.parse(JSON.stringify(this.voteQuestionsBak));
+                if (!this.searchKeyword) {
+                    return;
+                }
+                for (const voteQuestion of this.voteQuestions) {
+                    const options = voteQuestion.options;
+                    voteQuestion.options = options.filter(option => {
+                        const textOption = option.textOption || "";
+                        return textOption.indexOf(this.searchKeyword) > -1;
+                    });
+                    console.log('object :>> ', this.voteQuestionsBak);
+                }
+            },
+            /* 播放视频 */
+            showMedia(mediaPath) {
+                this.mediaPath = mediaPath;
+                this.toggle("media");
+            },
+            /* 查看图片 */
+            showImage(imagePath) {
+                this.imagePath = imagePath;
+                this.toggle("image");
+            },
+            /* 查看文字 */
+            showText(text) {
+                this.text = text;
+                this.toggle("text");
+            }
+        }
+    })
+</script>
+
+</html>

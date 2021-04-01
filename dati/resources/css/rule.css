@@ -1,0 +1,22 @@
+#rule {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-image: url("../img/bg-rule.jpg");
+	background-repeat: no-repeat;
+	background-size: 100%;
+	background-color: #35a573;
+}
+
+#rule .button-backhome {
+	position: absolute;
+	left: 7.775rem;
+	bottom: 6.6rem;
+	width: 21.95rem;
+	height: 7.55rem;
+	background: url("../img/button-backhome.png");
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}

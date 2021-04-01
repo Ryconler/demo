@@ -1,0 +1,385 @@
+<!DOCTYPE HMTL>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>答题活动</title>
+
+    <script src="./resources/js/area.js"></script>
+
+    <script src="./resources/js/jquery-3.5.1.min.js"></script>
+    <script src="./resources/js/vue-dev.js"></script>
+    <script src="./resources/js/vant.min.js"></script>
+
+    <link rel="stylesheet" href="./resources/css/vant.css" />
+
+    <link href="./resources/css/home.css" rel="stylesheet" />
+    <link href="./resources/css/dati.css" rel="stylesheet" />
+    <link href="./resources/css/rank.css" rel="stylesheet" />
+    <link href="./resources/css/rule.css" rel="stylesheet" />
+
+    <style type="text/css">
+        body {
+            margin: 0
+        }
+
+        div {
+            box-sizing: border-box;
+        }
+
+        #app {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        .model {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function calcWidth() {
+            const html = document.documentElement;
+            const width = html.getBoundingClientRect().width;
+            html.style.fontSize = 20 * (width / 750) + "px";
+        }
+        window.onresize = calcWidth;
+        calcWidth();
+
+        $.ajaxSetup({
+            headers: {
+                accessToken: "accessToken",
+                openId: "openId",
+                timestamp: Date.now()
+			}
+		});
+    </script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 首页 -->
+        <div id="home" v-if="isShowHome">
+            <div class="rule" @click="showRule"></div>
+            <div class="buttons">
+                <div class="button button-begin" @click="showDati"></div>
+                <div class="button button-rank" @click="showRank"></div>
+            </div>
+        </div>
+        <!-- 答题 -->
+        <div id="dati" v-if="isShowDati">
+            <div class="back" @click="closeDati"></div>
+            <div class="question" v-if="datiQuestion">
+                <img :src="datiQuestion.question" alt=""
+                    v-if="datiQuestion.questionType=='img'">
+                <video :src="datiQuestion.question" v-else-if="datiQuestion.questionType=='media'" autoplay
+                    controls></video>
+                <template v-else>
+                    {{datiQuestion.question}}
+                </template>
+            </div>
+            <div class="number">{{datiQuestion&&datiQuestion.questionNum}}</div>
+            <div class="answers" v-if="datiQuestion">
+                <div v-for="(option,index) of datiQuestion.options" class="answer" :class="'answer-'+index"
+                    :key="option.optionNum" @click="validAnswer(option.optionNum)">
+                    <img :src="resourceUrl+datiQuestion.relativePath+option.option" alt=""
+                        v-if="datiQuestion.type=='img'">
+                    <template v-else>
+                        {{option.option}}
+                    </template>
+                </div>
+            </div>
+            <div class="model" v-if="datiIsShowResult" @click="onClickModel">
+                <div class="result" @click.stop>
+                    <template v-if="datiQuestionAnswerResult==1">
+                        <div class="result-right"></div>
+                        <div class="result-score">
+                            +<span class="result-score-num">{{datiQuestionAmount}}</span>积分
+                        </div>
+                        <div class="button-next" @click="nextQuestion" v-if="!datiIsEnd"></div>
+                        <div class="button-rank" @click="showRank" v-else></div>
+                    </template>
+                    <template v-if="datiQuestionAnswerResult==-1">
+                        <div class="result-error"></div>
+                        <div class="button-rank" @click="showRank"></div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <!-- 排行榜 -->
+        <div id="rank" class="model" v-if="isShowRank">
+            <div class="rank">
+                <div class="rank-title"></div>
+                <div class="rank-close" @click="closeRank"></div>
+                <div class="rank-wrap">
+                    <div class="rank-item" v-for="(user,index) of rankList" :key="index">
+                        <div class="rank-num">{{user.rownum}}</div>
+                        <div class="rank-user">
+                            <div class="user-avatar"
+                                :style="{'background-image':'url('+(user.userInfo&&user.userInfo.avatar)+')'}"></div>
+                            <div class="user-info">
+                                <div class="user-name">{{user.userInfo&&user.userInfo.nickname}}</div>
+                                <div class="user-score">{{user.amount}}积分</div>
+                            </div>
+                        </div>
+                        <div class="rank-me" v-if="userInfo.userId==user.userId">我</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 规则 -->
+        <div id="rule" v-if="isShowRule">
+            <div class="button-backhome" @click="closeRule"></div>
+        </div>
+
+    </div>
+</body>
+<script type="text/javascript">
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            userInfo: {
+                openId: "openId",
+                stbId: "stbId",
+                userId: "userId",
+                avatar: "",
+                nickname: "",
+                amount: 0
+            }, // 用户信息
+            chn: "wechat",
+            baseApi: "https://www.fastmock.site/mock/f93caed92f89d3a2a02b6cd98e650b02/activity",
+            baseApiUcenter: "https://www.fastmock.site/mock/8bd8cf053e7d6d1ff21116fed0819c97/ucenter",
+            resourceUrl: "./",
+            issueCode: "issueCode",
+            questionCount: 5, // 题目数
+            rankCount: 5, // 排行榜人数
+            isShowHome: true,
+            isShowRule: false,
+            isShowDati: false,
+            isShowRank: false,
+            datiQuestions: [],
+            datiQuestionIndex: 0,
+            datiQuestionAnswerResult: 0, // 本题回答结果0初始，1对，-1错
+            datiQuestionAmount: 0, // 本题的积分
+            datiIsShowResult: false,
+            rankList: [],
+
+            userWechat: {
+            },
+            userInfoFormInit: {
+                showSex: false,
+                sexOptions: ['男', '女'],
+                showBirthday: false,
+                minDate: new Date(1900, 0, 1),
+                maxDate: new Date(),
+                currentDate: new Date(),
+                showArea: false,
+                areaList: areaList,
+            },
+            area: "",
+            birthdayLocal: "",
+            stbId: "",
+            sexLocal: "",
+            openId: "${user.openId}",
+            stbId: "${user.stbId}",
+        },
+        computed: {
+            // 是否答题结束
+            datiIsEnd() {
+                return this.datiQuestionAnswerResult === -1 || this.datiQuestionIndex >= this.datiQuestions.length - 1;
+            },
+            datiQuestion() {
+                return this.datiQuestions[this.datiQuestionIndex];
+            }
+        },
+        mounted() {
+            // const stbId = this.userInfo.stbId;
+            // this.userInfo.userId = stbId;
+            // if (stbId.indexOf("@") > 0) {
+            //     this.userInfo.userId = stbId.substring(0, stbId.indexOf("@"));
+            // }
+        },
+        methods: {
+            /* 查看规则 */
+            showRule() {
+                this.isShowRule = true;
+            },
+            closeRule() {
+                this.isShowRule = false;
+            },
+            toggle: (id) => {
+                $("#" + id).toggle();
+            },
+            /* 开始答题 */
+            showDati() {
+                this.toggle("personInfo");
+                if (this.questionCount === 0) {
+                    this.$notify({ type: 'danger', message: "请配置活动题目数量" });
+                    return;
+                }
+                this.getIssueAccount();
+                this.getQuestions();
+                this.datiQuestionIndex = 0;
+                this.isShowDati = true;
+            },
+            closeDati() {
+                this.isShowDati = false;
+            },
+            /* 显示排行 */
+            showRank() {
+                this.isShowRank = true;
+                this.getRankList();
+            },
+            closeRank() {
+                this.isShowRank = false;
+            },
+            /* 显示答题结果 */
+            showResult() {
+                this.datiIsShowResult = true;
+            },
+            closeResult() {
+                this.datiIsShowResult = false;
+            },
+            /* 下一题 */
+            nextQuestion() {
+                this.datiQuestionIndex++;
+                this.closeResult();
+            },
+            /* 获取活动用户信息 */
+            getIssueAccount() {
+                const api = this.baseApi + "/issue/v1/getIssueAccount";
+                const param = {
+                    chn: this.chn,
+                    issueCode: this.issueCode,
+                    stbId: this.userInfo.stbId,
+                };
+                $.ajax({
+                    type: "post",
+                    url: api,
+                    data: param,
+                    async: false,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            this.userInfo.amount = data.result.amount;
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 获取题目 */
+            getQuestions() {
+                const api = this.baseApi + "/answer/v2/signIssues";
+                const userInfo = {
+                    avatar: this.userInfo.avatar,
+                    nickname: this.userInfo.nickname
+                };
+                const param = {
+                    questionCount: this.questionCount,
+                    chn: this.chn,
+                    issueCode: this.issueCode,
+                    stbId: this.userInfo.stbId,
+                    userInfo: JSON.stringify(userInfo)
+                };
+                $.ajax({
+                    type: "post",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            this.datiQuestions = data.result;
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 验证答案 */
+            validAnswer(answer) {
+                const api = this.baseApi + "/answer/v1/checkAnswer"
+                const param = {
+                    questionId: this.datiQuestions[this.datiQuestionIndex].questionId,
+                    answer: answer,
+                    chn: this.chn,
+                    stbId: this.userInfo.stbId
+                };
+                this.datiQuestionAnswerResult = 0;
+                $.ajax({
+                    type: "post",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (answer == data.result.rightAnswerNum) {
+                            this.datiQuestionAnswerResult = 1;
+                            this.datiQuestionAmount = 10;
+                        } else {
+                            this.datiQuestionAnswerResult = -1;
+                        }
+                        this.userInfo.amount = data.result.amount;
+                        this.showResult();
+                    }
+                });
+            },
+            /* 获取排行数据 */
+            getRankList() {
+                const api = this.baseApi + "/issue/v1/getAmountRank";
+                const param = {
+                    chn: this.chn,
+                    issueCode: this.issueCode,
+                    stbId: this.userInfo.stbId,
+                    rankCount: this.rankCount,
+                    sort: "desc"
+                };
+                $.ajax({
+                    type: "post",
+                    url: api,
+                    data: param,
+                    success: (data) => {
+                        if (data.code === 0) {
+                            this.rankList = data.result.rankList;
+                            let myRank = null;
+                            this.rankList.forEach(rank => {
+                                if (rank.userInfo) {
+                                    try {
+                                        rank.userInfo = JSON.parse(rank.userInfo);
+                                    } catch (e) { console.log('解析userInfo出错 ', e); }
+                                }
+                                if (rank.userId === this.userInfo.userId) {
+                                    myRank = rank;
+                                }
+                            });
+                            this.rankList.splice(this.rankCount, this.rankList.length - this.rankCount);
+                            // if (myRank) {
+                            //     this.rankList.unshift(myRank);
+                            // }
+                        } else {
+                            this.$notify({ type: 'danger', message: data.msg });
+                        }
+                    }
+                });
+            },
+            /* 答题结束，点击model，返回首页 */
+            onClickModel() {
+                if (this.datiIsEnd) {
+                    this.closeDati();
+                    this.closeResult();
+                }
+            }
+        }
+    })
+</script>
+
+</html>
